@@ -3,3 +3,4 @@ build/
 dist/
 **/after.tex
 **/after.pdf
+tests/Makefile
