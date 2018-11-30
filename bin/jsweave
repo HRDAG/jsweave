@@ -49,7 +49,6 @@ def replace(TeX, JS):
         TeX = p.sub(str(y), TeX)
     return TeX
 
-
 def verify_substitution(TeX, JS):
     log = []
     p = re.compile(r"\\jsonsub(\[.*?\]){0,1}\{(.*?)\}")
@@ -120,23 +119,23 @@ def main():
     return
 
 
-def test():
-    j = getJson("../writeups/input/report.json")
-    # t = getTeX("../writeups/src/MSE_Peru_II.tex")
-    t = getTeX("../writeups/test.tex")
-    t = replace(t, j)
-    log = verify_substitution(t, j)
-    with open("output.tex", 'w') as outputfile:
-        outputfile.write(t)
-    with open("replace_log.log", 'w') as logfile:
-        logfile.writelines('\n'.join(log[1]))
-
-
-def test2():
-    t = getTeX("../writeups/src/MSE_Peru_II.tex")
-    print('\n'.join(preview_vs_code(t)))
-
-
+##def test():
+#    j = getJson("../writeups/input/report.json")
+#    # t = getTeX("../writeups/src/MSE_Peru_II.tex")
+#    t = getTeX("../writeups/test.tex")
+#    t = replace(t, j)
+#    log = verify_substitution(t, j)
+#    with open("output.tex", 'w') as outputfile:
+#        outputfile.write(t)
+#    with open("replace_log.log", 'w') as logfile:
+#        logfile.writelines('\n'.join(log[1]))
+#
+#
+#def test2():
+#    t = getTeX("../writeups/src/MSE_Peru_II.tex")
+#    print('\n'.join(preview_vs_code(t)))
+#
+#
 if __name__ == '__main__':
     main()
 

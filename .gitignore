@@ -5,3 +5,4 @@ dist/
 **/after.pdf
 tests/test-output.log
 tests/Makefile
+**/__pycache__/
