@@ -9,7 +9,7 @@
 # License: (c) Daniel Manrique-Vallier 2018, GPL v2 or newer
 #
 #
-# Replace occurrences of \jsonsub[xxx]{code} in TeX file with
+# replace occurrences of \jsonsub[xxx]{code} in TeX file with
 # the content of "code" from JSON file
 # In TeX file include:
 #
@@ -42,7 +42,7 @@ def getTeX(file_name):
     return TeX
 
 
-def replace(TeX, JS):
+def sub(TeX, JS):
     for x, y in JS.items():
         cad = r"\\jsonsub(\[[^\]]*?\])?\{" + re.escape(x) + r"\}"
         p = re.compile(cad)
@@ -104,7 +104,7 @@ def main():
     a = get_input()
     j = getJson(a.json)
     t = getTeX(a.tex)
-    t = replace(t, j)
+    t = sub(t, j)
     log = verify_substitution(t, j)
     with open(a.output, 'w') as outputfile:
         outputfile.write(t)
@@ -123,11 +123,11 @@ def main():
 #    j = getJson("../writeups/input/report.json")
 #    # t = getTeX("../writeups/src/MSE_Peru_II.tex")
 #    t = getTeX("../writeups/test.tex")
-#    t = replace(t, j)
+#    t = sub(t, j)
 #    log = verify_substitution(t, j)
 #    with open("output.tex", 'w') as outputfile:
 #        outputfile.write(t)
-#    with open("replace_log.log", 'w') as logfile:
+#    with open("sub_log.log", 'w') as logfile:
 #        logfile.writelines('\n'.join(log[1]))
 #
 #
