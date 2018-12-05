@@ -78,9 +78,10 @@ def check(TeX, JS):
     for x, y in JS.items():
         cad = r"\\jsonsub(\[([^\]]*?)\])?\{" + re.escape(x) + r"\}"
         p = re.compile(cad)
-        diffs = [ (ln[0] + 1, p.search(ln[1]).group(2), str(y)) 
+        escaped_json = tex_escape(str(y))
+        diffs = [ (ln[0] + 1, p.search(ln[1]).group(2), escaped_json) 
                   for ln in enumerate(texlines) 
-                  if p.search(ln[1]) is not None ]
+                  if p.search(ln[1]) is not None and escaped_json != p.search(ln[1]).group(2)]
         check_results.extend(diffs)
     return check_results
 

@@ -30,6 +30,14 @@ def test_check():
     expected_result = [(1, "40%", "30%")]
     assert check_output == expected_result
 
+# if no change, then don't report anything
+def test_check2():
+    TeX = "\\jsonsub[40\%]{datacrime}"
+    JS = {'datacrime':'40%'}
+    check_output = check(TeX, JS)
+    expected_result = []
+    assert check_output == expected_result
+
 def test_acceptance_sub():
     before_tex = getTeX("data/before.tex")
     fake_json = getJson("data/fake-json.json")
