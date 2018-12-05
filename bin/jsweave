@@ -49,6 +49,18 @@ def sub(TeX, JS):
         TeX = p.sub(str(y), TeX)
     return TeX
 
+def check(TeX, JS):
+    texlines = TeX.splitlines()
+    check_results = []
+    for x, y in JS.items():
+        cad = r"\\jsonsub(\[([^\]]*?)\])?\{" + re.escape(x) + r"\}"
+        p = re.compile(cad)
+        diffs = [ (ln[0] + 1, p.search(ln[1]).group(2), str(y)) 
+                  for ln in enumerate(texlines) 
+                  if p.search(ln[1]) is not None ]
+        check_results.extend(diffs)
+    return check_results
+
 def verify_substitution(TeX, JS):
     log = []
     p = re.compile(r"\\jsonsub(\[.*?\]){0,1}\{(.*?)\}")
