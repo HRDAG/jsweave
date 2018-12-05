@@ -20,7 +20,7 @@ def test_update():
     TeX = "\\jsonsub[40\%]{datacrime}"
     JS = {'datacrime':'30%'}
     updated_str = update(TeX, JS)
-    expected_str = '\\jsonsub[40\%]{datacrime}'
+    expected_str = '\\jsonsub[30\%]{datacrime}'
     assert updated_str == expected_str
 
 def test_check():

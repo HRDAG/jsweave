@@ -85,6 +85,14 @@ def check(TeX, JS):
         check_results.extend(diffs)
     return check_results
 
+def update(TeX, JS):
+    for x, y in JS.items():
+        cad = r"\\jsonsub(\[([^\]]*?)\])?\{" + re.escape(x) + r"\}"
+        replacement = "\\jsonsub[" + tex_escape(str(y)) + "]{" + x + "}"
+        p = re.compile(cad)
+        TeX = p.sub(replacement, TeX)
+    return TeX
+
 def verify_substitution(TeX, JS):
     log = []
     p = re.compile(r"\\jsonsub(\[.*?\]){0,1}\{(.*?)\}")
