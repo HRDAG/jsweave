@@ -27,7 +27,7 @@ def test_check():
     TeX = "\\jsonsub[40\%]{datacrime}"
     JS = {'datacrime':'30%'}
     check_output = check(TeX, JS)
-    expected_result = [(1, "40%", "30%")]
+    expected_result = [(1, "40\\%", "30\\%")]
     assert check_output == expected_result
 
 # if no change, then don't report anything
@@ -57,6 +57,6 @@ def test_acceptance_check():
     expected_result = [
             (11, "20", "77"),
             (13, "204,337.73", "197,283.11"),
-            (15, "55%", "1%")
+            (15, "55\\%", "1\\%")
         ]
     assert check_result == expected_result
