@@ -22,14 +22,6 @@ import json
 import argparse
 import re
 
-
-def xgetJson(file_name):
-    # using with statements is a bit safer and more pythonic
-    with open(file_name, "r") as f:
-        d = json.load(f)
-    return d
-
-
 def getJson(file_name):
     with open(file_name, "r") as f:
         d = json.load(f)
@@ -85,6 +77,13 @@ def check(TeX, JS):
         check_results.extend(diffs)
     return check_results
 
+def check_term(TeX, JS):
+    result = check(TeX, JS)
+    output = ["lineno|old_value|new_value"]
+    for ln in result:
+        output.append(str(ln[0]) + "|" + str(ln[1]) + "|" + str(ln[2]))
+    return("\n".join(output))
+
 def update(TeX, JS):
     for x, y in JS.items():
         cad = r"\\jsonsub(\[([^\]]*?)\])?\{" + re.escape(x) + r"\}"
@@ -132,59 +131,40 @@ def preview_vs_code(TeX):
 
 def get_input():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-t', '--tex', dest='tex',
-                        required=True, help='Input TeX file')
-    parser.add_argument('-j', '--json', dest='json',
-                        required=True, help='JSON file')
-    parser.add_argument('-o', '--output', dest='output',
-                        default='XX.tex', help='Output tex file')
-    parser.add_argument('-l', '--log', dest='log',
-                        default='subs_log.txt', help='Log file name')
+    parser.add_argument('command', choices = ['sub', 'check', 'update'])
+    parser.add_argument('-t', '--tex', dest = 'tex',
+                        required = True, help = 'Input TeX file')
+    parser.add_argument('-j', '--json', dest = 'json',
+                        required = True, help = 'JSON file')
+    parser.add_argument('-l', '--log', dest = 'log', required = False,
+                        help = 'Log file name')
     args = parser.parse_args()
     return(args)
 
 
 def main():
-    a = get_input()
-    j = getJson(a.json)
-    t = getTeX(a.tex)
-    t = sub(t, j)
-    log = verify_substitution(t, j)
-    with open(a.output, 'w') as outputfile:
-        outputfile.write(t)
-    with open(a.log, 'w') as logfile:
-        if len(log[1]) > 0:
-            log[1].insert(0, 'Undefined Codes:' + str(len(log[0])))
-            logfile.write('\n'.join(log[1]))
-        else:
-            logfile.write('Success!')
-            print('No errors')
-        print('\n'.join(log[1]))
+    args = get_input()
+    json = getJson(args.json)
+    tex = getTeX(args.tex)
+    cmd = args.command
+
+    print({
+        "sub": sub(tex, json),
+        "check": check_term(tex, json),
+        "update": update(tex, json)
+    }[cmd])
+
+    if args.log and cmd != "check":
+        log = verify_substitution(tex, json)
+        with open(args.log, 'w') as logfile:
+            if len(log[1]) > 0:
+                log[1].insert(0, 'Undefined Codes:' + str(len(log[0])))
+                logfile.write('\n'.join(log[1]))
+            else:
+                logfile.write('Success!')
     return
 
-
-##def test():
-#    j = getJson("../writeups/input/report.json")
-#    # t = getTeX("../writeups/src/MSE_Peru_II.tex")
-#    t = getTeX("../writeups/test.tex")
-#    t = sub(t, j)
-#    log = verify_substitution(t, j)
-#    with open("output.tex", 'w') as outputfile:
-#        outputfile.write(t)
-#    with open("sub_log.log", 'w') as logfile:
-#        logfile.writelines('\n'.join(log[1]))
-#
-#
-#def test2():
-#    t = getTeX("../writeups/src/MSE_Peru_II.tex")
-#    print('\n'.join(preview_vs_code(t)))
-#
-#
 if __name__ == '__main__':
     main()
-
-    # test()
-
-    # test2()
 
 # done.
