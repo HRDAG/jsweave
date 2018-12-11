@@ -16,22 +16,22 @@
 #      \usepackage{color}
 #      \newcommand{\jsonsub}[2][XXXX]{ \textcolor{red}{#1} }
 #
-# Use in TeX file: \jsonsub[<defaul value>][<code for substitution>]
+# Use in TeX file: \jsonsub[<default value>]{<code for substitution>}
 
 import json
 import argparse
 import re
 
-def getJson(file_name):
+def get_json(file_name):
     with open(file_name, "r") as f:
         d = json.load(f)
     return d
 
 
-def getTeX(file_name):
-    with open(file_name, "r") as f_TeX:
-        TeX = f_TeX.read()
-    return TeX
+def get_tex(file_name):
+    with open(file_name, "r") as f_tex:
+        tex = f_tex.read()
+    return tex
 
 def tex_escape(text):
     r"""
@@ -61,51 +61,56 @@ def tex_escape(text):
                                  for key in
                                  sorted(conv.keys(),
                                         key=lambda item: - len(item))))
-    return regex.sub(lambda match: conv[match.group()], text)
+    return regex.sub(lambda match: conv[match.group()], str(text))
 
 
-def sub(TeX, JS):
-    for x, y in JS.items():
-        cad = r"\\jsonsub(\[([^\]]*?)\])?\{" + re.escape(x) + r"\}"
-        p = re.compile(cad)
-        TeX = p.sub(tex_escape(str(y)), TeX)
-    return TeX
+def jsonsub_regex(obj_name):
+    pattern = r"\\jsonsub(\[([^\]]+)\])?\{" + re.escape(obj_name) + r"\}"
+    return re.compile(pattern)
 
-def check(TeX, JS):
-    texlines = TeX.splitlines()
+
+def sub(tex, js):
+    for key, value in js.items():
+        pattern = jsonsub_regex(key)
+        tex = pattern.sub(tex_escape(value), tex)
+    return tex
+
+def check(tex, js):
+    texlines = tex.splitlines()
     check_results = []
-    for x, y in JS.items():
-        cad = r"\\jsonsub(\[([^\]]*?)\])?\{" + re.escape(x) + r"\}"
-        p = re.compile(cad)
-        escaped_json = tex_escape(str(y))
-        diffs = [ (ln[0] + 1, p.search(ln[1]).group(2), escaped_json)
-                  for ln in enumerate(texlines)
-                  if p.search(ln[1]) is not None and escaped_json != p.search(ln[1]).group(2)]
+    for key, value in js.items():
+        pattern = jsonsub_regex(key)
+        data_value = tex_escape(value)
+        #          linenumber,  old value in tex,                 new json val
+        diffs = [ (line[0] + 1, pattern.search(line[1]).group(2), data_value)
+                  for line in enumerate(texlines)
+                  if pattern.search(line[1]) is not None and
+                     data_value != pattern.search(line[1]).group(2)]
         check_results.extend(diffs)
     return check_results
 
-def check_term(TeX, JS):
-    result = check(TeX, JS)
+def check_term(tex, js):
+    result = check(tex, js)
     output = ["lineno|old_value|new_value"]
     for ln in result:
         output.append(str(ln[0]) + "|" + str(ln[1]) + "|" + str(ln[2]))
     return("\n".join(output))
 
-def update(TeX, JS):
-    for x, y in JS.items():
+def update(tex, js):
+    for x, y in js.items():
         cad = r"\\jsonsub(\[([^\]]*?)\])?\{" + re.escape(x) + r"\}"
         replacement = r"\\jsonsub[" + tex_escape(str(y)) + "]{" + x + "}"
         p = re.compile(cad)
-        TeX = p.sub(replacement, TeX)
-    return TeX
+        tex = p.sub(replacement, tex)
+    return tex
 
-def verify_substitution(TeX, JS):
+def verify_substitution(tex, js):
     log = []
     p = re.compile(r"\\jsonsub(\[.*?\]){0,1}\{(.*?)\}")
     i = 1
     j = 1
     lns = []
-    for l in TeX.splitlines():
+    for l in tex.splitlines():
         a = p.findall(l)
         if a:
             tmp = []
@@ -120,12 +125,12 @@ def verify_substitution(TeX, JS):
     return [log, lns]
 
 
-def preview_vs_code(TeX):
+def preview_vs_code(tex):
     'print line : code : preview'
     p = re.compile(r"\\jsonsub\[(.*?)\]{0,1}\{(.*?)\}")
     lns = []
     i = 1
-    for l in TeX.splitlines():
+    for l in tex.splitlines():
         a = p.findall(l)
         if a:
             tmp = []
@@ -151,8 +156,8 @@ def get_input():
 
 def main():
     args = get_input()
-    json = getJson(args.json)
-    tex = getTeX(args.tex)
+    json = get_json(args.json)
+    tex = get_tex(args.tex)
     cmd = args.command
 
     print({
