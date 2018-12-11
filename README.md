@@ -1,6 +1,6 @@
 # jsweave
 
-Code to weave data literals into LaTeX, with defaults, so that the LaTeX code can be edited interactively without weaving.
+Code to weave data literals into LaTeX, with defaults, so that the LaTeX code can be edited interactively without `knitr` or `Sweave`.
 
 # Name collisions
 
