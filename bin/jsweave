@@ -33,6 +33,7 @@ def get_tex(file_name):
         tex = f_tex.read()
     return tex
 
+
 def tex_escape(text):
     r"""
         https://stackoverflow.com/questions/16259923/how-can-i-escape-latex-special-characters-inside-django-templates
@@ -75,19 +76,20 @@ def sub(tex, js):
         tex = pattern.sub(tex_escape(value), tex)
     return tex
 
+
 def check(tex, js):
     texlines = tex.splitlines()
     check_results = []
     for key, value in js.items():
         pattern = jsonsub_regex(key)
         data_value = tex_escape(value)
-        #          linenumber,  old value in tex,                 new json val
         diffs = [ (line[0] + 1, pattern.search(line[1]).group(2), data_value)
                   for line in enumerate(texlines)
                   if pattern.search(line[1]) is not None and
                      data_value != pattern.search(line[1]).group(2)]
         check_results.extend(diffs)
     return check_results
+
 
 def check_term(tex, js):
     result = check(tex, js)
@@ -96,6 +98,7 @@ def check_term(tex, js):
         output.append(str(ln[0]) + "|" + str(ln[1]) + "|" + str(ln[2]))
     return("\n".join(output))
 
+
 def update(tex, js):
     for x, y in js.items():
         cad = r"\\jsonsub(\[([^\]]*?)\])?\{" + re.escape(x) + r"\}"
@@ -103,6 +106,7 @@ def update(tex, js):
         p = re.compile(cad)
         tex = p.sub(replacement, tex)
     return tex
+
 
 def verify_substitution(tex, js):
     log = []
@@ -175,6 +179,7 @@ def main():
             else:
                 logfile.write('Success!')
     return
+
 
 if __name__ == '__main__':
     main()
