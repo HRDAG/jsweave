@@ -16,124 +16,107 @@
 #      \usepackage{color}
 #      \newcommand{\jsonsub}[2][XXXX]{ \textcolor{red}{#1} }
 #
-# Use in TeX file: \jsonsub[<defaul value>][<code for substitution>]
+# Use in TeX file: \jsonsub[<default value>]{<code for substitution>}
 
 import json
 import argparse
 import re
+import pylatexenc.latexencode
 
-def getJson(file_name):
+
+def get_json(file_name):
     with open(file_name, "r") as f:
         d = json.load(f)
     return d
 
 
-def getTeX(file_name):
-    with open(file_name, "r") as f_TeX:
-        TeX = f_TeX.read()
-    return TeX
+def get_tex(file_name):
+    with open(file_name, "r") as f_tex:
+        tex = f_tex.read()
+    return tex
+
 
 def tex_escape(text):
-    r"""
-        https://stackoverflow.com/questions/16259923/how-can-i-escape-latex-special-characters-inside-django-templates
-        :param text: a plain text message
-        :return: the message escaped to appear correctly in LaTeX
-
-        TODO: what if any conv.key is preceded by one or more backslashes?
-              for example, our json is {'bigdogs': '27\%'}
-    """
-
-    conv = {
-        '&': r'\&',
-        '%': r'\%',
-        '$': r'\$',
-        '#': r'\#',
-        '_': r'\_',
-        '{': r'\{',
-        '}': r'\}',
-        '~': r'\textasciitilde{}',
-        '^': r'\^{}',
-        '\\': r'\textbackslash{}',
-        '<': r'\textless{}',
-        '>': r'\textgreater{}',
-    }
-    regex = re.compile(r'|'.join(re.escape(str(key))
-                                 for key in
-                                 sorted(conv.keys(),
-                                        key=lambda item: - len(item))))
-    return regex.sub(lambda match: conv[match.group()], text)
+    return pylatexenc.latexencode.utf8tolatex(str(text), brackets = False)
 
 
-def sub(TeX, JS):
-    for x, y in JS.items():
-        cad = r"\\jsonsub(\[([^\]]*?)\])?\{" + re.escape(x) + r"\}"
-        p = re.compile(cad)
-        TeX = p.sub(tex_escape(str(y)), TeX)
-    return TeX
+def jsonsub_regex(obj_name, escape = True):
+    if escape:
+        obj = re.escape(obj_name)
+    else:
+        obj = obj_name
+    pattern = r"\\jsonsub(\[([^\]]+)\])?\{" + obj + r"\}"
+    return re.compile(pattern)
 
-def check(TeX, JS):
-    texlines = TeX.splitlines()
+
+def sub(tex, js):
+    for key, value in js.items():
+        pattern = jsonsub_regex(key)
+        tex = pattern.sub(tex_escape(value), tex)
+    return tex
+
+
+def check(tex, js):
+    texlines = tex.splitlines()
     check_results = []
-    for x, y in JS.items():
-        cad = r"\\jsonsub(\[([^\]]*?)\])?\{" + re.escape(x) + r"\}"
-        p = re.compile(cad)
-        escaped_json = tex_escape(str(y))
-        diffs = [ (ln[0] + 1, p.search(ln[1]).group(2), escaped_json)
-                  for ln in enumerate(texlines)
-                  if p.search(ln[1]) is not None and escaped_json != p.search(ln[1]).group(2)]
+    for key, value in js.items():
+        pattern = jsonsub_regex(key)
+        data_value = tex_escape(value)
+        diffs = [ (line[0] + 1, pattern.search(line[1]).group(2), data_value)
+                  for line in enumerate(texlines)
+                  if pattern.search(line[1]) is not None and
+                     data_value != pattern.search(line[1]).group(2) ]
         check_results.extend(diffs)
     return check_results
 
-def check_term(TeX, JS):
-    result = check(TeX, JS)
+
+def check_term(tex, js):
+    result = check(tex, js)
     output = ["lineno|old_value|new_value"]
     for ln in result:
         output.append(str(ln[0]) + "|" + str(ln[1]) + "|" + str(ln[2]))
     return("\n".join(output))
 
-def update(TeX, JS):
-    for x, y in JS.items():
-        cad = r"\\jsonsub(\[([^\]]*?)\])?\{" + re.escape(x) + r"\}"
-        replacement = r"\\jsonsub[" + tex_escape(str(y)) + "]{" + x + "}"
-        p = re.compile(cad)
-        TeX = p.sub(replacement, TeX)
-    return TeX
 
-def verify_substitution(TeX, JS):
-    log = []
-    p = re.compile(r"\\jsonsub(\[.*?\]){0,1}\{(.*?)\}")
-    i = 1
-    j = 1
-    lns = []
-    for l in TeX.splitlines():
-        a = p.findall(l)
-        if a:
-            tmp = []
-            for inst in a:
-                tmp.append('\t<-->\t'.join(inst))
-            log.append(i)
-            lns.append("> line " + str(i) + ":\n\t\t" + '\n\t\t'.join(tmp))
-            j = j + len(a)
-        i = i + 1
-    lns.insert(0, 'Non substituted entries: ' + str(j) + '\n')
-    lns.insert(0, 'Lines with no Substitutions: ' + str(len(lns)))
-    return [log, lns]
+def update(tex, js):
+    for key, value in js.items():
+        pattern = jsonsub_regex(key)
+        replacement = r"\\jsonsub[" + tex_escape(value) + "]{" + key + "}"
+        tex = pattern.sub(replacement, tex)
+    return tex
 
 
-def preview_vs_code(TeX):
-    'print line : code : preview'
-    p = re.compile(r"\\jsonsub\[(.*?)\]{0,1}\{(.*?)\}")
-    lns = []
-    i = 1
-    for l in TeX.splitlines():
-        a = p.findall(l)
-        if a:
-            tmp = []
-            for inst in a:
-                tmp.append('{' + '<-->'.join(inst) + '}')
-            lns.append("> line " + str(i) + ": " + ', '.join(tmp))
-        i = i + 1
-    return lns
+def verify_substitution(tex):
+    non_sub_line_nbrs = []
+    details = []
+    non_sub_cnt = 0
+    jsonsub_pattern = jsonsub_regex("(.*)", escape = False)
+    for line in enumerate(tex.splitlines()):
+        line_txt = line[1]
+        line_nbr = line[0] + 1
+        matches = jsonsub_pattern.findall(line_txt)
+        if matches:
+            non_sub_line_nbrs.append(line_nbr)
+            non_sub = [match[0] + '\t<-->\t' + match[2] for match in matches]
+            details.append("> line " + str(line_nbr) + ":\n\t\t" +
+                    '\n\t\t'.join(non_sub))
+            non_sub_cnt = non_sub_cnt + len(matches)
+    non_sub_line_cnt = len(non_sub_line_nbrs)
+    details.insert(0, 'Non substituted entries: ' + str(non_sub_cnt) + '\n')
+    details.insert(0, 'Lines with no Substitutions: ' + str(non_sub_line_cnt))
+    return [non_sub_line_nbrs, details]
+
+
+def write_logfile(substituted, filename):
+    log = verify_substitution(substituted)
+    n_undefined = len(log[0])
+    log_details = log[1]
+    with open(filename, 'w') as logfile:
+        if n_undefined > 0:
+            log_details.insert(0, 'Undefined Codes:' + str(n_undefined))
+            logfile.write('\n'.join(log_details))
+        else:
+            logfile.write('Success!')
 
 
 def get_input():
@@ -151,25 +134,26 @@ def get_input():
 
 def main():
     args = get_input()
-    json = getJson(args.json)
-    tex = getTeX(args.tex)
-    cmd = args.command
+    json = get_json(args.json)
+    tex  = get_tex(args.tex)
+    cmd  = args.command
 
-    print({
-        "sub": sub(tex, json),
-        "check": check_term(tex, json),
-        "update": update(tex, json)
-    }[cmd])
-
-    if args.log and cmd != "check":
-        log = verify_substitution(tex, json)
-        with open(args.log, 'w') as logfile:
-            if len(log[1]) > 0:
-                log[1].insert(0, 'Undefined Codes:' + str(len(log[0])))
-                logfile.write('\n'.join(log[1]))
-            else:
-                logfile.write('Success!')
+    if cmd == "sub":
+        substituted = sub(tex, json)
+        print(substituted)
+        if args.log:
+            write_logfile(substituted, args.log)
+    elif cmd == "check":
+        print(check_term(tex, json))
+    else:
+        updated = update(tex, json)
+        print(update(tex, json))
+        if args.log:
+            log = check_term(updated, json)
+            with open(args.log, 'w') as logfile:
+                logfile.write(log)
     return
+
 
 if __name__ == '__main__':
     main()
