@@ -40,8 +40,12 @@ def tex_escape(text):
     return pylatexenc.latexencode.utf8tolatex(str(text), brackets = False)
 
 
-def jsonsub_regex(obj_name):
-    pattern = r"\\jsonsub(\[([^\]]+)\])?\{" + re.escape(obj_name) + r"\}"
+def jsonsub_regex(obj_name, escape = True):
+    if escape:
+        obj = re.escape(obj_name)
+    else:
+        obj = obj_name
+    pattern = r"\\jsonsub(\[([^\]]+)\])?\{" + obj + r"\}"
     return re.compile(pattern)
 
 
@@ -82,41 +86,37 @@ def update(tex, js):
     return tex
 
 
-def verify_substitution(tex, js):
-    log = []
-    p = re.compile(r"\\jsonsub(\[.*?\]){0,1}\{(.*?)\}")
-    i = 1
-    j = 1
-    lns = []
-    for l in tex.splitlines():
-        a = p.findall(l)
-        if a:
-            tmp = []
-            for inst in a:
-                tmp.append('\t<-->\t'.join(inst))
-            log.append(i)
-            lns.append("> line " + str(i) + ":\n\t\t" + '\n\t\t'.join(tmp))
-            j = j + len(a)
-        i = i + 1
-    lns.insert(0, 'Non substituted entries: ' + str(j) + '\n')
-    lns.insert(0, 'Lines with no Substitutions: ' + str(len(lns)))
-    return [log, lns]
+def verify_substitution(tex):
+    non_sub_line_nbrs = []
+    details = []
+    non_sub_cnt = 0
+    jsonsub_pattern = jsonsub_regex("(.*)", escape = False)
+    for line in enumerate(tex.splitlines()):
+        line_txt = line[1]
+        line_nbr = line[0] + 1
+        matches = jsonsub_pattern.findall(line_txt)
+        if matches:
+            non_sub_line_nbrs.append(line_nbr)
+            non_sub = [match[0] + '\t<-->\t' + match[2] for match in matches]
+            details.append("> line " + str(line_nbr) + ":\n\t\t" +
+                    '\n\t\t'.join(non_sub))
+            non_sub_cnt = non_sub_cnt + len(matches)
+    non_sub_line_cnt = len(non_sub_line_nbrs)
+    details.insert(0, 'Non substituted entries: ' + str(non_sub_cnt) + '\n')
+    details.insert(0, 'Lines with no Substitutions: ' + str(non_sub_line_cnt))
+    return [non_sub_line_nbrs, details]
 
 
-def preview_vs_code(tex):
-    'print line : code : preview'
-    p = re.compile(r"\\jsonsub\[(.*?)\]{0,1}\{(.*?)\}")
-    lns = []
-    i = 1
-    for l in tex.splitlines():
-        a = p.findall(l)
-        if a:
-            tmp = []
-            for inst in a:
-                tmp.append('{' + '<-->'.join(inst) + '}')
-            lns.append("> line " + str(i) + ": " + ', '.join(tmp))
-        i = i + 1
-    return lns
+def write_logfile(substituted, filename):
+    log = verify_substitution(substituted)
+    n_undefined = len(log[0])
+    log_details = log[1]
+    with open(filename, 'w') as logfile:
+        if n_undefined > 0:
+            log_details.insert(0, 'Undefined Codes:' + str(n_undefined))
+            logfile.write('\n'.join(log_details))
+        else:
+            logfile.write('Success!')
 
 
 def get_input():
@@ -135,23 +135,23 @@ def get_input():
 def main():
     args = get_input()
     json = get_json(args.json)
-    tex = get_tex(args.tex)
-    cmd = args.command
+    tex  = get_tex(args.tex)
+    cmd  = args.command
 
-    print({
-        "sub": sub(tex, json),
-        "check": check_term(tex, json),
-        "update": update(tex, json)
-    }[cmd])
-
-    if args.log and cmd != "check":
-        log = verify_substitution(tex, json)
-        with open(args.log, 'w') as logfile:
-            if len(log[1]) > 0:
-                log[1].insert(0, 'Undefined Codes:' + str(len(log[0])))
-                logfile.write('\n'.join(log[1]))
-            else:
-                logfile.write('Success!')
+    if cmd == "sub":
+        substituted = sub(tex, json)
+        print(substituted)
+        if args.log:
+            write_logfile(substituted, args.log)
+    elif cmd == "check":
+        print(check_term(tex, json))
+    else:
+        updated = update(tex, json)
+        print(update(tex, json))
+        if args.log:
+            log = check_term(updated, json)
+            with open(args.log, 'w') as logfile:
+                logfile.write(log)
     return
 
 
