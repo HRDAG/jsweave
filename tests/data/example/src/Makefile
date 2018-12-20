@@ -6,14 +6,16 @@
 
 .PHONY: all clean
 
-all: output/example_workflow.pdf		
+all: output/example.pdf		
 
 clean:
 	-rm output/*
 
-output/example_workflow.pdf: \
+output/example.pdf: \
 		src/example.tex \
 		src/json.json  
-		pdflatex example.tex
-	#cd src && pdflatex dcjs-cja-report-processed.tex
+		pdflatex src/example.tex
+		mv example.pdf output/example.pdf 
+		mv example.log output/example.log 	
+		mv example.aux output/example.aux
 #done.
