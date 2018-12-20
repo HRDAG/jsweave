@@ -12,7 +12,8 @@ clean:
 	-rm output/*
 
 output/example_workflow.pdf: \
-		src/example.Rmd \
-		#src/example_json.json  
-		Rscript -e rmarkdown::render"("src/example.Rmd", output_format = "all")"
+		src/example.tex \
+		src/json.json  
+		pdflatex example.tex
+	#cd src && pdflatex dcjs-cja-report-processed.tex
 #done.
