@@ -4,8 +4,11 @@ Code to weave data literals into LaTeX, with defaults, so that the LaTeX code ca
 
 #Usage Overview 
 
-This tool was built to help mitigate having to go back and forth to udpate your calucations. Instead you can use jsweave's 
-marker to tag each number and this will allow you to keep your numbers calculated and up to date. 
+This tool was built to help mitigate going back and forth to udpate your values. Instead you can use jsweave's 
+tag to encase each value and this will allow you to keep your values calculated and up to date. This is especially helpful
+because it informs you where the value came from, and if the data changes you can update it using jsweave instead of searching 
+through your latex file to adjust each value change. 
+
 
 ```
 jsweave --help 
