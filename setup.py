@@ -10,7 +10,7 @@ from setuptools import setup
 
 setup(
     name='jsweave',
-    version='0.1-alpha',
+    version='0.1.9000-dev',
     description='weave values by name from json name:value into LaTeX',
     url='https://github.com/HRDAG/jsweave',
     author='Daniel Manrique-Vallier',
