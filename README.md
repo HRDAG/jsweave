@@ -13,11 +13,11 @@ The overall process is as follows:
 original_file.tex --> processed_file.tex --> processed_file.pdf
 ```
 
-To setup your latex file so that your values are calcuated you will need to incase your values with the json command. 
+To setup your latex file so that your values are calcuated you will need to incase your values with the json command 
 ```
 \jsonsub[20]{plainnumber}
 ```
-Run jsweave. 
+Run jsweave 
 ```
 jsweave sub -t processed_file.tex -j json_data.json
 ```
@@ -26,7 +26,6 @@ jsweave sub -t processed_file.tex -j json_data.json
 ```
 jsweave --help 
 ```
-
 ```
 usage: jsweave [-h] -t TEX -j JSON [-l LOG] {sub,check,update}
 
@@ -51,7 +50,7 @@ To install this package we recommend [cloning the repository](https://help.githu
 
 # License
 
-Please have a look at the [LICENSE.md](https://github.com/HRDAG/jsweave/blob/master/LICENSE for more details.)
+Please have a look at the [LICENSE.md](https://github.com/HRDAG/jsweave/blob/master/LICENSE) for more details.
 
 
 <!-- done. -->
