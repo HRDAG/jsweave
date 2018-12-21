@@ -13,10 +13,24 @@ The overall process is as follows:
 original_file.tex --> processed_file.tex --> processed_file.pdf
 ```
 
-To setup your latex file so that your values are calcuated you will need to incase your values with the json command 
+To setup your latex file so that your values are calcuated, include the following line in the frontmatter:
+
 ```
-\jsonsub[20]{plainnumber}
+\newcommand{\jsonsub}[2][XXXXX]{\textcolor{red}{#1}}
 ```
+
+Then, in your document, encase literal values with the `jsonsub` command. That is, instead of:
+
+```
+The number of observations is 20
+```
+
+Use this: 
+
+```
+The number of observations is \jsonsub[20]{nobs}
+```
+
 Run jsweave 
 ```
 jsweave sub -t processed_file.tex -j json_data.json
