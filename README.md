@@ -2,14 +2,18 @@
 
 Code to weave data literals into LaTeX, with defaults, so that the LaTeX code can be edited interactively without `knitr` or `Sweave`.
 
-#Usage Overview (example walkthrough)
+#Usage Overview 
 
+This tool was built to help mitigate having to go back and forth to udpate your calucations. Instead you can use jsweave's 
+marker to tag each number and this will allow you to keep your numbers calculated and up to date. 
+
+```
 jsweave --help 
+```
 
 #Installation  
 
--options and setup.py will help with those
--it wont be pip, use git clonet a
+To install this package we recommend [cloning the repository](https://help.github.com/articles/cloning-a-repository/). 
 
 # Troubleshooting & Debugging
 
