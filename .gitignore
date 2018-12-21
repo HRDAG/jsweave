@@ -1,8 +1,9 @@
 **/*.egg-info
+**/.eggs
 build/
 dist/
 **/after.tex
 **/after.pdf
 tests/test-output.log
 tests/Makefile
-**/__pycache__/
+__pycache__/

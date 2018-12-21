@@ -18,6 +18,8 @@ setup(
     packages=['jsweave'],
     zip_safe=True,
     scripts=['bin/jsweave'],
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest']
 )
 
 # done.
