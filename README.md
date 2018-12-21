@@ -31,7 +31,14 @@ Use this:
 The number of observations is \jsonsub[20]{nobs}
 ```
 
-Run jsweave 
+If you compile the file normally (e.g. using `pdflatex`), then the number "20" in the above sentence will be highlighted in red, to signify that it is not bound to an auditable data value. Instead, generate a json file that maps variable names to values, e.g.:
+
+```
+{ "nobs": "20" }
+```
+
+Then run jsweave 
+
 ```
 jsweave sub -t processed_file.tex -j json_data.json
 ```
