@@ -4,6 +4,8 @@ build/
 dist/
 **/after.tex
 **/after.pdf
+**example.log
+**example.aux
 tests/test-output.log
 tests/Makefile
 __pycache__/
