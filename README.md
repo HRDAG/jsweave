@@ -61,7 +61,7 @@ optional arguments:
 ```
 # Installation  
 
-To install this package we recommend [cloning the repository](https://help.github.com/articles/cloning-a-repository/). 
+To install this package we recommend [cloning the repository](https://help.github.com/articles/cloning-a-repository/). Then `cd` into the new directory, and give the command `python setup.py install`. To see the associated unit tests, run `python setup.py tests`. 
 
 # Name collisions
 
